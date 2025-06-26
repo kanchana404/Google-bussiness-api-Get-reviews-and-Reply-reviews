@@ -5,12 +5,21 @@ import { NextRequest, NextResponse } from 'next/server';
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
-  'https://portforward.kavithakanchana.xyz/api/auth/callback'
+  process.env.GOOGLE_REDIRECT_URI
 );
 
 export async function GET(request: NextRequest) {
   try {
     console.log('Starting OAuth flow...');
+    
+    // Validate required environment variables
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET || !process.env.GOOGLE_REDIRECT_URI) {
+      console.error('Missing required environment variables');
+      return NextResponse.json(
+        { error: 'OAuth configuration is incomplete' },
+        { status: 500 }
+      );
+    }
     
     // Define the scopes for Google Business Profile
     const scopes = [

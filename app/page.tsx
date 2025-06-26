@@ -124,8 +124,20 @@ export default function GoogleBusinessReviews() {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const reviewsPerPage = 10;
 
-  // OAuth URL - direct Google OAuth URL
-  const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=429150483588-3g1i793ubvua8pstal4uhh1inbjnspur.apps.googleusercontent.com&response_type=code&scope=https://www.googleapis.com/auth/business.manage&redirect_uri=https://portforward.kavithakanchana.xyz/api/auth/callback&access_type=offline&prompt=consent`;
+  // Get environment variables
+  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+  const redirectUri = process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI;
+
+  // Validate environment variables
+  if (!clientId) {
+    console.error('NEXT_PUBLIC_GOOGLE_CLIENT_ID is not set in environment variables');
+  }
+  if (!redirectUri) {
+    console.error('NEXT_PUBLIC_GOOGLE_REDIRECT_URI is not set in environment variables');
+  }
+
+  // OAuth URL using environment variables
+  const oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&response_type=code&scope=https://www.googleapis.com/auth/business.manage&redirect_uri=${encodeURIComponent(redirectUri || '')}&access_type=offline&prompt=consent`;
 
   // Check authentication status and URL params on mount
   useEffect(() => {
@@ -172,6 +184,10 @@ export default function GoogleBusinessReviews() {
 
   // Direct redirect to OAuth URL
   const handleConnect = () => {
+    if (!clientId || !redirectUri) {
+      setStatusMessage('Google OAuth configuration is missing. Please check environment variables.');
+      return;
+    }
     window.location.href = oauthUrl;
   };
 
